@@ -213,10 +213,12 @@ K. 自定义：______
 
 **3.8 生成指令 Skill 文件**
 
-读取 `references/output-templates.md` 中的「指令 Skill 模板」部分，将 `{name}` 替换为用户的真实名字/昵称，生成以下 6 个 Skill 文件：
+读取 `references/output-templates.md` 中的「指令 Skill 模板」部分，将 `{name}` 替换为用户的真实名字/昵称，生成以下 Skill 文件：
 
 | Skill | 保存路径 | 触发指令 |
 |---|---|---|
+| {name} | `.claude/skills/{name}/SKILL.md` | `/{name}` |
+| bye | `.claude/skills/bye/SKILL.md` | `/bye` |
 | test | `.claude/skills/test/SKILL.md` | `/test` |
 | train | `.claude/skills/train/SKILL.md` | `/train` |
 | next | `.claude/skills/next/SKILL.md` | `/next` |
@@ -226,7 +228,7 @@ K. 自定义：______
 | enrich | `.claude/skills/enrich/SKILL.md` | `/enrich` |
 | protect | `.claude/skills/protect/SKILL.md` | `/protect` |
 
-这些是支撑 test/train/enrich/protect 的必需指令——没有它们，`/next`、`/fine`、`/end` 无法被系统识别和触发。
+这些是支撑对话、测试、训练的必需指令——没有它们，`/{name}`、`/next`、`/fine`、`/end`、`/bye` 无法被系统识别和触发。
 
 ### Step 4：告知完成
 
@@ -245,6 +247,8 @@ K. 自定义：______
 └── scenario-pool.md              # （可选）场景池
 
 .claude/skills/
+├── {name}/SKILL.md               # /{name} 人格对话
+├── bye/SKILL.md                  # /bye 退出对话
 ├── test/SKILL.md                 # /test 测试模式
 ├── train/SKILL.md                # /train 训练模式
 ├── next/SKILL.md                 # /next 切换角色
@@ -256,13 +260,11 @@ K. 自定义：______
 - 输入 /{name} 直接与你的数字分身对话
 - 输入 /test 进入测试模式，让别人扮演你来测试模型
 - 输入 /train 进入训练模式，通过真实对话进一步优化模型
-- 输入 /status 查看当前模型状态
-
-所有规则已保存，在新对话中只需提及这些指令即可唤醒。
-```
+- 输入 /bye 退出人格对话
 - 输入 /status 查看当前模型状态
 
 所有规则已保存到 .claude/persona/rules.md，在新对话中只需提及这些指令即可唤醒。
+```
 ```
 
 **重要**：Phase 2 完成后不要自动进入 Phase 3。等待用户主动输入指令。
@@ -537,14 +539,16 @@ dev/ 和 .claude/.mode_dev 已被 .gitignore 排除。
 │   └── scenario-pool.md          # （可选）场景池
 └── skills/
     ├── {name}/
-    │   └── SKILL.md              # Phase 5 生成的最终 Persona Skill
-    ├── test/SKILL.md             # /test 指令
-    ├── train/SKILL.md            # /train 指令
-    ├── next/SKILL.md             # /next 指令
-    ├── fine/SKILL.md             # /fine 指令
-    ├── end/SKILL.md              # /end 指令
-    ├── end/SKILL.md              # /end 指令
-    ├── status/SKILL.md           # /status 指令
-    └── enrich/SKILL.md           # /enrich 指令
-    └── protect/SKILL.md          # /protect 指令
+    │   └── SKILL.md              # /{name} 人格对话
+    ├── bye/SKILL.md              # /bye 退出对话
+    ├── test/SKILL.md             # /test 测试模式
+    ├── train/SKILL.md            # /train 训练模式
+    ├── next/SKILL.md             # /next 切换角色
+    ├── fine/SKILL.md             # /fine 保存退出测试
+    ├── end/SKILL.md              # /end 总结退出训练
+    ├── status/SKILL.md           # /status 查看状态
+    ├── enrich/SKILL.md           # /enrich 加权丰富
+    ├── protect/SKILL.md          # /protect 隐私保护
+    ├── dev/SKILL.md              # /dev 开发者模式
+    └── exit/SKILL.md             # /exit 退出开发模式
 ```

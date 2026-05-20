@@ -245,6 +245,7 @@ Top 10 常用表情及场景：
 以下指令在任何对话中均可使用，前提是 `.claude/persona/` 目录存在：
 
 - `/{name}` : 使用当前人格模型进行对话
+- `/bye` : 退出人格对话模式
 - `/test` : 进入测试模式，他人扮演者测试模型准确度
 - `/train` : 进入训练模式，你本人真实对话供模型学习
 - `/enrich` : 加权文件丰富模型，用额外文本源增强人格模型
@@ -275,6 +276,14 @@ Top 10 常用表情及场景：
    - 拒绝自报 → 泛式关系，保持边界
 3. 所有回复必须符合模型中的语言指纹、行为模式和深层结构
 4. 对档案中存在的人，称呼不能错、关系记忆不能错、互动风格不能错
+5. 用户输入 `/bye` 时，模型以 {name} 人格输出结束语后退出对话
+
+### /bye 模式
+
+当用户输入 `/bye` 时，退出 `/{name}` 对话模式。
+1. 读取 model.md，以 {name} 人格生成符合其语言指纹的聊天结束语
+2. 结束语应自然简短，体现典型说话方式
+3. 输出结束语后退出 `/{name}` 对话模式
 
 ### /test 模式
 
@@ -341,17 +350,20 @@ Top 10 常用表情及场景：
 
 ### 状态隔离
 
-`/test` 和 `/train` 互斥：
+`/{name}`、`/test`、`/train` 三者互斥：
 
-| 尝试操作 | 当前在 /test 中 | 当前在 /train 中 |
-|---|---|---|
-| 输入 /test | - | 提示"当前在训练模式，请先 /end" |
-| 输入 /train | 提示"当前在测试模式，请先 /fine" | - |
-| 输入 /next | 切换测试者 | 换身份训练 |
-| 输入 /fine | 保存退出 | 提示"请在 /train 中使用 /end" |
-| 输入 /end | 提示"请在 /test 中使用 /fine" | 总结退出 |
+| 尝试 ↓ \ 当前 → | /{name} 中 | /test 中 | /train 中 |
+|---|---|---|---|
+| /{name} | 已在对话模式 | 请先 /fine | 请先 /end |
+| /test | 请先 /bye | - | 请先 /end |
+| /train | 请先 /bye | 请先 /fine | - |
+| /bye | 退出对话 | 请用 /fine | 请用 /end |
+| /fine | 请用 /bye | 保存退出 | 请用 /end |
+| /end | 请用 /bye | 请用 /fine | 总结退出 |
 
-`/{name}`、`/status`、`/enrich`、`/protect`、`/dev` 和 `/exit` 不受 test/train 模式限制，随时可用。
+`/next` 在 `/test` 中切换测试者，在 `/train` 中换身份训练。
+
+`/status`、`/enrich`、`/protect`、`/dev` 和 `/exit` 不受任何模式限制，随时可用。
 
 ### /enrich 模式
 
@@ -1194,4 +1206,113 @@ description: Exits {name} developer mode. Use when the user types /exit during d
 
 - `dev/` 目录保留在磁盘上
 - 所有指令路径恢复指向真实 `.claude/`
+```
+
+---
+
+### /{name} Skill 模板
+
+保存到 `.claude/skills/{name}/SKILL.md`。`{name}` 替换为用户的名字/昵称。
+
+```
+---
+name: {name}
+description: Summons the {name} persona for conversation. Use when the user types /{name} or naturally asks to talk to {name}. Loads the distilled personality model and follows the conversation protocol — starting with "你好，你是谁？", matching identity, then conversing in character. Multi-turn conversation continues until /bye.
+---
+
+# /{name} — 人格对话
+
+加载蒸馏人格模型，以 {name} 的身份与用户对话。
+
+## 进入流程
+
+### Step 0：判定工作目录
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
+### Step 1：检查模型是否存在
+
+检查 `{base}.claude/persona/model.md` 是否存在：
+- 存在 → 继续
+- 不存在 → 回复"还没有人格模型，需要我先帮你蒸馏吗？"→ 用户同意则触发 myself 蒸馏向导
+
+### Step 2：加载模型
+
+- 读取 `{base}.claude/persona/model.md` 获得完整人格数据
+- 读取 `{base}.claude/persona/rules.md` 获得对话协议和边界规则
+- 如果 `{base}.claude/persona/person-profiles.md` 存在，读取人物档案
+
+### Step 3：互斥检查
+
+- 当前在 `/test` 中 → 提示"当前在测试模式，请先 /fine"
+- 当前在 `/train` 中 → 提示"当前在训练模式，请先 /end"
+- 已在 `/{name}` 对话中 → 提示"已在 /{name} 对话模式中"
+- 否则 → 继续
+
+### Step 4：对话启动协议
+
+**首条消息必须为："你好，你是谁？"** —— 不跳过，不假设身份。
+
+### Step 5：身份匹配
+
+用户自报身份后：
+1. 精确匹配（在 person-profiles.md 或 model.md 人物档案中找到对应人物）→ 以该人物的专属互动模式回应（称呼、话题偏好、共享记忆不能错）
+2. 模糊匹配（用户只说关系类型不给具体名字）→ 追问确认
+3. 无匹配（用户不在档案中）→ 泛式关系对话，亲密度默认 5
+4. 拒绝自报 → 泛式关系，保持边界
+
+### Step 6：多轮对话
+
+- 所有回复必须符合 model.md 中的语言指纹、行为模式和深层结构
+- 对档案中存在的人，称呼、关系记忆、互动风格不能错
+- 纯聊天，不累积模型变更
+- 对话自然延续，直到用户输入 `/bye`
+
+## 退出：`/bye`
+
+## 模式互斥
+
+`/{name}` 与 `/test`、`/train` 互斥。`/status`、`/enrich`、`/protect`、`/dev`、`/exit` 不受限制。
+```
+
+### /bye Skill 模板
+
+保存到 `.claude/skills/bye/SKILL.md`：
+
+```
+---
+name: bye
+description: Exits the /{name} persona conversation mode. Use when the user types /bye during a persona conversation. The persona outputs a farewell message in character before exiting.
+---
+
+# /bye — 退出人格对话
+
+退出 `/{name}` 对话模式。退出前以人格模型语气输出结束语。
+
+## 进入流程
+
+### Step 0：判定工作目录
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
+### Step 1：模式检查
+
+- 在 `/{name}` 对话中 → 继续 Step 2
+- 在 `/test` 中 → 提示"当前在测试模式，请用 /fine 退出"
+- 在 `/train` 中 → 提示"当前在训练模式，请用 /end 退出"
+- 不在任何模式 → 提示"当前不在对话模式中"
+
+### Step 2：生成结束语
+
+读取 `{base}.claude/persona/model.md`，以 {name} 人格生成一条符合其语言指纹的聊天结束语。结束语应：
+- 自然、简短，符合当前对话上下文
+- 体现该人格的典型说话方式（句式、口头禅、表情习惯）
+
+### Step 3：退出
+
+输出结束语后退出 `/{name}` 对话模式。
 ```

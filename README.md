@@ -1,3 +1,4 @@
+
 # myself-skill — 人格蒸馏向导
 
 将你的聊天记录和自述蒸馏为一个可调用的数字分身 Skill。通过 5 阶段引导式流程，创建一个能模仿你说话方式、性格特征和互动模式的 AI 人格模型。
@@ -23,6 +24,7 @@
 | 指令 | 说明 |
 |---|---|
 | `/{你的名字}` | 与你的数字分身对话 |
+| `/bye` | 退出人格对话模式 |
 | `/test` | 进入测试模式 |
 | `/train` | 进入训练模式 |
 | `/next` | 在 test/train 中切换角色 |
@@ -47,7 +49,8 @@
 │   └── scenario-pool.md           # 场景池（可选）
 └── skills/
     ├── {name}/
-    │   └── SKILL.md               # 最终人格 Skill
+    │   └── SKILL.md               # /{name} 人格对话
+    ├── bye/SKILL.md               # /bye 退出对话
     ├── test/SKILL.md
     ├── train/SKILL.md
     ├── next/SKILL.md
