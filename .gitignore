@@ -1,3 +1,7 @@
 # Developer sandbox
 /dev/
 .claude/.mode_dev
+
+# User-specific persona skill (generated during Phase 2 distillation)
+# Each user has their own {name} folder, e.g. mob1s/
+.claude/skills/mob1s/
