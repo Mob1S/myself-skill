@@ -224,8 +224,9 @@ K. 自定义：______
 | end | `.claude/skills/end/SKILL.md` | `/end` |
 | status | `.claude/skills/status/SKILL.md` | `/status` |
 | enrich | `.claude/skills/enrich/SKILL.md` | `/enrich` |
+| protect | `.claude/skills/protect/SKILL.md` | `/protect` |
 
-这些是支撑 test/train/enrich 多轮对话循环的必需指令——没有它们，`/next`、`/fine`、`/end` 无法被系统识别和触发。
+这些是支撑 test/train/enrich/protect 的必需指令——没有它们，`/next`、`/fine`、`/end` 无法被系统识别和触发。
 
 ### Step 4：告知完成
 
@@ -299,6 +300,73 @@ K. 自定义：______
 ### 可重复使用
 
 `/enrich` 可多次调用。已存在的 model.md 始终作为合并基线。
+
+---
+
+## /protect 指令：隐私保护向导
+
+用户输入 `/protect` 时触发。交互式向导，扫描蒸馏产物并按敏感度生成 `.gitignore`，保护隐私信息不被 git 追踪。
+
+### 前置条件
+
+- `.claude/persona/` 目录必须存在，否则回复"还没有蒸馏模型，无需隐私保护。"
+- `/protect` 不受 `/test` / `/train` 模式锁定，随时可用。
+
+### 执行规则
+
+**Step 1：扫描文件**
+
+扫描以下位置的所有文件：
+- `.claude/persona/` 下的所有 `.md` 文件
+- `.claude/skills/` 下的所有 `SKILL.md` 文件
+- 项目根目录下可能的原始聊天记录文件（`*.txt`、`*chat*`、`*聊天*` 等）
+
+**Step 2：敏感度评级**
+
+对每个文件按以下规则评级并展示给用户：
+
+| 文件 | 敏感度 | 理由 |
+|---|---|---|
+| `base-identity.md` | 🔴 高 | 含真实姓名、年龄、职业、城市 |
+| `linguistic-fingerprint.md` | 🔴 高 | 含大量聊天原文引用 |
+| `person-profiles.md` | 🔴 高 | 含真实人物姓名、关系、共享记忆 |
+| 根目录原始聊天记录文件 | 🔴 高 | 原始对话数据 |
+| `model.md` | 🟡 中 | 含提炼后的身份信息、姓名、称呼体系 |
+| `{name}/SKILL.md`（最终人格 Skill） | 🟡 中 | 含姓名和性格描述，但这是共享的目标产物 |
+| `CHANGELOG.md` | 🟢 低 | 仅版本记录 |
+| `rules.md` | 🟢 低 | 调用规则模板 |
+| `scenario-pool.md` | 🟢 低 | 通用场景池 |
+| 指令 Skill 文件（test/train/next/fine/end/status/enrich） | 🟢 低 | 通用指令模板 |
+
+展示方式：逐文件或分组展示，标注默认建议（🔴🟡 默认排除，🟢 默认公开）。
+
+**Step 3：用户确认**
+
+对每个文件或每组文件，询问用户选择"排除"或"公开"。用户可按默认建议快速跳过。
+
+**Step 4：生成 .gitignore**
+
+- 若 `.gitignore` 已存在 → 在末尾追加，前加注释分隔符 `# /protect generated`
+- 若不存在 → 新建
+- 排除规则使用相对路径（如 `.claude/persona/base-identity.md`）
+
+**Step 5：输出隐私报告**
+
+```
+隐私保护报告
+
+🔒 已排除（N 个文件）：
+- .claude/persona/base-identity.md        # 含真实姓名、年龄、城市
+- .claude/persona/linguistic-fingerprint.md  # 含聊天原文引用
+- ...
+
+🌐 对外可见（N 个文件）：
+- .claude/persona/rules.md                # 调用规则
+- .claude/skills/test/SKILL.md            # 测试指令
+- ...
+
+.gitignore 已生成。
+```
 
 ---
 
@@ -398,4 +466,5 @@ K. 自定义：______
     ├── end/SKILL.md              # /end 指令
     ├── status/SKILL.md           # /status 指令
     └── enrich/SKILL.md           # /enrich 指令
+    └── protect/SKILL.md          # /protect 指令
 ```
