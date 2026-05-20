@@ -434,10 +434,10 @@ K. 自定义：______
 
 1. 创建目录结构：
    - `dev/.claude/persona/`
-   - `dev/.claude/skills/`
    - `dev/mock/`
-2. 将 `dev/` 加入 `.gitignore`（若已存在则追加，若不存在则新建）
-3. 询问用户：
+2. 创建标记文件 `.claude/.mode_dev`
+3. 将 `dev/` 和 `.claude/.mode_dev` 加入 `.gitignore`（若已存在则追加，若不存在则新建）
+4. 询问用户：
 
 ```
 是否需要生成 mock 测试数据？
@@ -458,11 +458,10 @@ K. 自定义：______
 目录结构：
 dev/
 ├── .claude/
-│   ├── persona/          # 测试用 persona 文件
-│   └── skills/           # 测试用指令 Skill
+│   └── persona/          # 测试用 persona 文件
 └── mock/                 # mock 测试数据
 
-dev/ 已被 .gitignore 排除。
+dev/ 和 .claude/.mode_dev 已被 .gitignore 排除。
 
 进入开发者模式 [dev] — 所有指令路径指向 dev/.claude/
 输入 /exit 退出。
@@ -470,16 +469,15 @@ dev/ 已被 .gitignore 排除。
 
 ### 再次进入（dev/ 已存在）
 
-直接输出"进入开发者模式 [dev] — 输入 /exit 退出。"
+1. 检查 `.claude/.mode_dev` 是否存在
+2. 已存在 → 提示"已在开发者模式中。输入 /exit 退出。"
+3. 不存在 → 创建标记文件 → 提示"进入开发者模式 [dev] — 输入 /exit 退出。"
 
-### 路径映射
+### 路径切换机制
 
-开发者模式中，所有指令的读写基路径切换：
-
-| 正常模式 | 开发者模式 |
-|---|---|
-| `.claude/persona/` | `dev/.claude/persona/` |
-| `.claude/skills/` | `dev/.claude/skills/` |
+通过标记文件 `.claude/.mode_dev` 实现。所有指令 skill 在 Step 0 检查此文件：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
 
 每条指令的行为逻辑不变，仅基路径切换。
 
@@ -491,13 +489,15 @@ dev/ 已被 .gitignore 排除。
 
 ### 模式检查
 
-- 当前在开发者模式中 → 切换回正常模式，输出"已退出开发者模式，路径恢复。dev/ 目录已保留。"
-- 当前不在开发者模式中 → 回复"当前不在开发者模式中。"
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 当前在开发者模式中，执行退出流程
+- 不存在 → 回复"当前不在开发者模式中。"
 
-### 退出后
+### 退出流程
 
-- `dev/` 目录保留在磁盘上，下次 `/dev` 继续使用
-- 所有指令路径恢复指向 `.claude/`
+1. 删除标记文件 `.claude/.mode_dev`
+2. 提示"已退出开发者模式，路径恢复。dev/ 目录已保留。"
+3. 所有指令路径恢复指向 `.claude/`
 
 ---
 

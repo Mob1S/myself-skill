@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v1.3.1] - 2026-05-20
+- **修复** `/dev` 开发者模式指令 skill 无法触发的 bug
+- 引入 `.claude/.mode_dev` 标记文件作为模式检测机制
+- 所有指令 skill 的 Step 0 统一检查标记文件判断基路径
+- 删除不可达的 `dev/.claude/skills/` 目录
+- 更新主 SKILL.md、所有指令 skill、output-templates.md 模板
+- `.gitignore` 追加 `.claude/.mode_dev`
+
 ## [v1.3.0] - 2026-05-20
 - **新增** `/dev` 指令模块：进入开发者模式，创建隔离沙箱 `dev/`
 - **新增** `/exit` 指令模块：退出开发者模式

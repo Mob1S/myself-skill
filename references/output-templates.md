@@ -320,21 +320,23 @@ Top 10 常用表情及场景：
 
 1. 检查 `dev/` 目录是否存在
 2. 不存在则初始化沙箱：
-   - 创建 `dev/.claude/persona/`、`dev/.claude/skills/`、`dev/mock/`
-   - 将 `dev/` 加入 `.gitignore`
+   - 创建 `dev/.claude/persona/`、`dev/mock/`
+   - 创建标记文件 `.claude/.mode_dev`
+   - 将 `dev/` 和 `.claude/.mode_dev` 加入 `.gitignore`
    - 询问用户是否生成 mock 测试数据
-3. 存在则直接进入
-4. 进入后，所有指令的读写基路径从 `.claude/` 重定向到 `dev/.claude/`
+3. 存在则检查 `.claude/.mode_dev`：
+   - 已存在 → 提示"已在开发者模式中"
+   - 不存在 → 创建标记文件 → 进入开发者模式
+4. 进入后，通过标记文件实现路径重定向
 5. 提示标注 [dev]
-6. 已在开发者模式中输入 `/dev` → 提示"已在开发者模式中"
 
 ### /exit 模式
 
 当用户输入 `/exit` 时，退出开发者模式。
 
-1. 检查当前是否在开发者模式中
-2. 在 → 切回正常模式，路径恢复指向 `.claude/`，输出退出信息
-3. 不在 → 回复"当前不在开发者模式中"
+1. 检查 `.claude/.mode_dev` 是否存在
+2. 存在 → 删除标记文件，切回正常模式，路径恢复指向 `.claude/`，输出退出信息
+3. 不存在 → 回复"当前不在开发者模式中"
 4. `dev/` 目录保留在磁盘上
 
 ### 状态隔离
@@ -583,9 +585,15 @@ description: Enters {name} persona test mode. Use when the user types /test. The
 
 ## 进入流程
 
+### Step 0：判定工作目录
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
 ### Step 1：加载模型
-读取 `.claude/persona/rules.md` 的 TEST_MODE 部分。
-如果 `.claude/persona/model.md` 存在，读取它以获得完整人格数据。
+读取 `{base}.claude/persona/rules.md` 的 TEST_MODE 部分。
+如果 `{base}.claude/persona/model.md` 存在，读取它以获得完整人格数据。
 
 ### Step 2：收集参数
 用户需提供以下参数。可一次性输入（`/test 大学同学 6 下课路上 '诶 {name} 晚上打不'`），也可逐步提供。缺失项逐项询问：
@@ -632,9 +640,15 @@ description: Enters {name} persona training mode. Use when the user types /train
 
 ## 进入流程
 
+### Step 0：判定工作目录
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
 ### Step 1：加载模型
-读取 `.claude/persona/rules.md` 的 TRAIN_MODE 部分。
-如果 `.claude/persona/model.md` 存在，读取它以获得完整人格数据。
+读取 `{base}.claude/persona/rules.md` 的 TRAIN_MODE 部分。
+如果 `{base}.claude/persona/model.md` 存在，读取它以获得完整人格数据。
 
 ### Step 2：模型主动开启
 模型主动说明三项信息，然后发送首条消息：
@@ -690,6 +704,12 @@ description: Switches to the next test/train character during {name} /test or /t
 # /next — 切换下一个角色
 
 `/test` 和 `/train` 共用的子指令。结束当前角色对话，切换到新角色。
+
+## 开发者模式
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
 
 ## 模式检查
 
@@ -752,6 +772,12 @@ description: Finalizes an active {name} /test session. ONLY use when the user ty
 - 当前不在 `/test` 中 → 回复"当前不在测试模式中，/fine 需要在 /test 中使用"
 - 当前在 `/train` 中 → 回复"当前在训练模式中，请先 /end 退出训练模式"
 
+## 开发者模式
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
 ## 保存退出流程
 
 1. **汇总调整**：列出本轮测试中所有被标记为"不像"并调整过的项目
@@ -791,6 +817,12 @@ description: Finalizes an active {name} /train session. ONLY use when the user t
 - 当前在 `/train` 中 → 执行总结退出流程
 - 当前不在 `/train` 中 → 回复"当前不在训练模式中，/end 需要在 /train 中使用"
 - 当前在 `/test` 中 → 回复"当前在测试模式中，请先 /fine 退出测试模式"
+
+## 开发者模式
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
 
 ## 总结退出流程
 
@@ -833,6 +865,12 @@ description: Shows the current {name} persona model status. Use when the user ty
 
 Display the current model status.
 
+## 开发者模式
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
 ## Procedure
 
 1. If `.claude/persona/model.md` and `.claude/persona/CHANGELOG.md` exist, read them for full status
@@ -858,6 +896,12 @@ description: Enriches the {name} persona model with additional weighted files. U
 用额外文件丰富人格模型。用户设定每个文件的权重，系统分析后加权合并到现有模型。
 
 ## 进入流程
+
+### Step 0：判定工作目录
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
 
 ### Step 1：检查场景
 - `.claude/persona/model.md` 存在 → 增量补充模式
@@ -960,7 +1004,8 @@ description: Privacy protection wizard for the {name} persona. Use when the user
 
 ## 前置条件
 
-- `.claude/persona/` 目录必须存在，否则回复"还没有蒸馏模型，无需隐私保护。"
+- 检查 `.claude/.mode_dev` 文件是否存在：存在 → 基路径 = `dev/.claude/`；不存在 → 基路径 = `.claude/`
+- `{base}.claude/persona/` 目录必须存在，否则回复"还没有蒸馏模型，无需隐私保护。"
 
 ## 进入流程
 
@@ -1078,10 +1123,10 @@ description: Enters developer mode for {name} skill testing. Use when the user t
 
 1. 创建目录结构：
    - `dev/.claude/persona/`
-   - `dev/.claude/skills/`
    - `dev/mock/`
-2. 将 `dev/` 加入 `.gitignore`（若已存在则追加 `dev/`，若不存在则新建）
-3. 询问用户：
+2. 创建标记文件 `.claude/.mode_dev`
+3. 将 `dev/` 和 `.claude/.mode_dev` 加入 `.gitignore`（若已存在则追加，若不存在则新建）
+4. 询问用户：
 
 ```
 是否需要生成 mock 测试数据？
@@ -1093,31 +1138,26 @@ description: Enters developer mode for {name} skill testing. Use when the user t
 你可以之后在 dev/mock/ 中自行修改内容。回复"要"或"跳过"。
 ```
 
-4. 若用户选择生成，创建 mock 文件（内容为通用示例，标注"示例数据，请修改"）
-5. 输出沙箱就绪信息 + 目录结构
-6. 进入开发者模式
+5. 若用户选择生成，创建 mock 文件（内容为通用示例，标注"示例数据，请修改"）
+6. 输出沙箱就绪信息 + 目录结构
+7. 进入开发者模式
 
 ### 再次进入（dev/ 已存在）
 
-直接输出"进入开发者模式 [dev] — 输入 /exit 退出。"
+1. 检查 `.claude/.mode_dev` 是否存在
+2. 已存在 → 提示"已在开发者模式中。输入 /exit 退出。"
+3. 不存在 → 创建标记文件 → 提示"进入开发者模式 [dev] — 输入 /exit 退出。"
 
 ## 开发者模式中
 
-- 所有指令路径重定向到 `dev/.claude/`，与真实 `.claude/` 完全隔离
+- 所有指令路径通过标记文件 `.claude/.mode_dev` 重定向到 `dev/.claude/`，与真实 `.claude/` 完全隔离
 - 所有指令行为逻辑不变，仅基路径切换
 - `/status` 额外标注当前处于开发者模式
-
-## 路径映射
-
-| 正常模式 | 开发者模式 |
-|---|---|
-| `.claude/persona/` | `dev/.claude/persona/` |
-| `.claude/skills/` | `dev/.claude/skills/` |
 
 ## 模式互斥
 
 - 已在开发者模式中输入 `/dev` → 提示"已在开发者模式中。输入 /exit 退出。"
-- `/exit` 退出开发者模式
+- `/exit` 退出开发者模式，删除 `.claude/.mode_dev`
 ```
 
 ### /exit Skill 模板
@@ -1136,13 +1176,15 @@ description: Exits {name} developer mode. Use when the user types /exit during d
 
 ## 模式检查
 
-- 当前在开发者模式中 → 切换回正常模式
-- 当前不在开发者模式中 → 回复"当前不在开发者模式中。"
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 当前在开发者模式中，执行退出流程
+- 不存在 → 回复"当前不在开发者模式中。"
 
 ## 退出流程
 
-1. 路径恢复：所有指令读写基路径从 `dev/.claude/` 切回 `.claude/`
-2. 输出：
+1. 删除标记文件 `.claude/.mode_dev`
+2. 路径恢复：所有指令读写基路径从 `dev/.claude/` 切回 `.claude/`
+3. 输出：
 
 ```
 已退出开发者模式，路径恢复。dev/ 目录已保留，下次输入 /dev 继续使用。
