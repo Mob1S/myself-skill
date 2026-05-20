@@ -249,6 +249,8 @@ Top 10 常用表情及场景：
 - `/train` : 进入训练模式，你本人真实对话供模型学习
 - `/enrich` : 加权文件丰富模型，用额外文本源增强人格模型
 - `/protect` : 隐私保护向导，扫描敏感文件并生成 .gitignore
+- `/dev` : 进入开发者模式，创建隔离沙箱测试 Skill
+- `/exit` : 退出开发者模式
 - `/status` : 查看当前模型版本和基本信息
 - `/skill` : 基于当前模型生成 Skill 文件
 
@@ -312,6 +314,29 @@ Top 10 常用表情及场景：
 6. 用户输入 `/end` → 输出《训练收获总结》，更新 model.md，写入 CHANGELOG，版本号+0.1，退出训练模式
 7. 模型不可扮演用户的父母/长辈角色
 
+### /dev 模式
+
+当用户输入 `/dev` 时，进入开发者模式。
+
+1. 检查 `dev/` 目录是否存在
+2. 不存在则初始化沙箱：
+   - 创建 `dev/.claude/persona/`、`dev/.claude/skills/`、`dev/mock/`
+   - 将 `dev/` 加入 `.gitignore`
+   - 询问用户是否生成 mock 测试数据
+3. 存在则直接进入
+4. 进入后，所有指令的读写基路径从 `.claude/` 重定向到 `dev/.claude/`
+5. 提示标注 [dev]
+6. 已在开发者模式中输入 `/dev` → 提示"已在开发者模式中"
+
+### /exit 模式
+
+当用户输入 `/exit` 时，退出开发者模式。
+
+1. 检查当前是否在开发者模式中
+2. 在 → 切回正常模式，路径恢复指向 `.claude/`，输出退出信息
+3. 不在 → 回复"当前不在开发者模式中"
+4. `dev/` 目录保留在磁盘上
+
 ### 状态隔离
 
 `/test` 和 `/train` 互斥：
@@ -324,7 +349,7 @@ Top 10 常用表情及场景：
 | 输入 /fine | 保存退出 | 提示"请在 /train 中使用 /end" |
 | 输入 /end | 提示"请在 /test 中使用 /fine" | 总结退出 |
 
-`/{name}`、`/status`、`/enrich` 和 `/protect` 不受模式限制，随时可用。
+`/{name}`、`/status`、`/enrich`、`/protect`、`/dev` 和 `/exit` 不受 test/train 模式限制，随时可用。
 
 ### /enrich 模式
 
@@ -1031,4 +1056,100 @@ description: Privacy protection wizard for the {name} persona. Use when the user
 ## 模式互斥
 
 `/protect` 不受 `/test` / `/train` 模式锁定，随时可用。
+```
+
+### /dev Skill 模板
+
+保存到 `.claude/skills/dev/SKILL.md`：
+
+```
+---
+name: dev
+description: Enters developer mode for {name} skill testing. Use when the user types /dev. Creates an isolated sandbox at dev/ with its own .claude/ mirror. All instruction paths redirect to dev/.claude/ so testing won't affect real persona data.
+---
+
+# /dev — {name} 开发者模式
+
+创建隔离沙箱 `dev/`，进入开发者模式测试 Skill 和蒸馏流程。
+
+## 进入流程
+
+### 首次运行（dev/ 不存在）
+
+1. 创建目录结构：
+   - `dev/.claude/persona/`
+   - `dev/.claude/skills/`
+   - `dev/mock/`
+2. 将 `dev/` 加入 `.gitignore`（若已存在则追加 `dev/`，若不存在则新建）
+3. 询问用户：
+
+```
+是否需要生成 mock 测试数据？
+
+包括：
+- 模拟身份档案（dev/mock/identity-sample.md）
+- 模拟聊天记录（dev/mock/chat-sample.md）
+
+你可以之后在 dev/mock/ 中自行修改内容。回复"要"或"跳过"。
+```
+
+4. 若用户选择生成，创建 mock 文件（内容为通用示例，标注"示例数据，请修改"）
+5. 输出沙箱就绪信息 + 目录结构
+6. 进入开发者模式
+
+### 再次进入（dev/ 已存在）
+
+直接输出"进入开发者模式 [dev] — 输入 /exit 退出。"
+
+## 开发者模式中
+
+- 所有指令路径重定向到 `dev/.claude/`，与真实 `.claude/` 完全隔离
+- 所有指令行为逻辑不变，仅基路径切换
+- `/status` 额外标注当前处于开发者模式
+
+## 路径映射
+
+| 正常模式 | 开发者模式 |
+|---|---|
+| `.claude/persona/` | `dev/.claude/persona/` |
+| `.claude/skills/` | `dev/.claude/skills/` |
+
+## 模式互斥
+
+- 已在开发者模式中输入 `/dev` → 提示"已在开发者模式中。输入 /exit 退出。"
+- `/exit` 退出开发者模式
+```
+
+### /exit Skill 模板
+
+保存到 `.claude/skills/exit/SKILL.md`：
+
+```
+---
+name: exit
+description: Exits {name} developer mode. Use when the user types /exit during dev mode. Switches all instruction paths back to the real .claude/ directory. The dev/ sandbox directory is preserved on disk.
+---
+
+# /exit — {name} 退出开发者模式
+
+切回正常模式，路径恢复指向真实 `.claude/`。
+
+## 模式检查
+
+- 当前在开发者模式中 → 切换回正常模式
+- 当前不在开发者模式中 → 回复"当前不在开发者模式中。"
+
+## 退出流程
+
+1. 路径恢复：所有指令读写基路径从 `dev/.claude/` 切回 `.claude/`
+2. 输出：
+
+```
+已退出开发者模式，路径恢复。dev/ 目录已保留，下次输入 /dev 继续使用。
+```
+
+## 退出后
+
+- `dev/` 目录保留在磁盘上
+- 所有指令路径恢复指向真实 `.claude/`
 ```
