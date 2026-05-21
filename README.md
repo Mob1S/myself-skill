@@ -34,6 +34,7 @@
 | `/skill` | 生成最终 Skill 文件 |
 | `/enrich` | 用额外文件加权丰富人格模型 |
 | `/deep` | 深度二次阅读聊天记录，挖掘遗漏细节 |
+| `/wechat-export` | 微信聊天记录导出引导，推荐工具并协助安装 |
 | `/protect` | 隐私保护向导 |
 
 ## 输出结构
@@ -60,6 +61,7 @@
     ├── fine/SKILL.md
     ├── end/SKILL.md
     ├── deep/SKILL.md               # /deep 深度阅读
+    ├── wechat-export/SKILL.md      # /wechat-export 导出引导
     ├── enrich/SKILL.md             # /enrich 加权丰富
     ├── protect/SKILL.md            # /protect 隐私保护
     ├── dev/SKILL.md                # /dev 开发者模式

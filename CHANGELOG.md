@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [v1.6.0] - 2026-05-21
+- **新增** `/wechat-export` 指令模块：微信聊天记录导出引导
+- 推荐 WeFlow（主力）+ WechatDump202601（密钥兜底）工具链
+- 协助下载安装：检测平台 → 下载 → 用户授权后自动安装
+- 逐步引导使用：打开 WeFlow → 获取密钥 → 导出 TXT
+- 密钥获取失败时推荐 WechatDump202601 手动提取，不阻塞流程
+- 导出后无缝衔接到 Phase 2 蒸馏分析
+- 首次推荐附隐私说明和手动替代方案（复制粘贴/截图）
+- Phase 2 Step 1 末尾联动提示 `/wechat-export` 可用
+- SKILL.md 新增 `/wechat-export` 完整执行规则
+- output-templates.md 新增 `/wechat-export` Skill 模板、rules.md 模板新增规则
+- README.md 核心指令表新增 `/wechat-export`
+
 ## [v1.5.0] - 2026-05-21
 - **新增** `/deep` 指令模块：深度二次阅读聊天记录，挖掘首次蒸馏遗漏的细节
 - 四层深度分析框架：语言指纹 → 行为模式 → 人物关系 → 底层价值观（新增维度）

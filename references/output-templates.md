@@ -250,6 +250,7 @@ Top 10 常用表情及场景：
 - `/train` : 进入训练模式，你本人真实对话供模型学习
 - `/enrich` : 加权文件丰富模型，用额外文本源增强人格模型
 - `/deep` : 深度二次阅读，对聊天记录做多证据链的深入分析
+- `/wechat-export` : 微信聊天记录导出引导，推荐工具并协助安装
 - `/protect` : 隐私保护向导，扫描敏感文件并生成 .gitignore
 - `/dev` : 进入开发者模式，创建隔离沙箱测试 Skill
 - `/exit` : 退出开发者模式
@@ -364,7 +365,7 @@ Top 10 常用表情及场景：
 
 `/next` 在 `/test` 中切换测试者，在 `/train` 中换身份训练。
 
-`/status`、`/enrich`、`/protect`、`/deep`、`/dev` 和 `/exit` 不受任何模式限制，随时可用。
+`/status`、`/enrich`、`/protect`、`/deep`、`/wechat-export`、`/dev` 和 `/exit` 不受任何模式限制，随时可用。
 
 ### /deep 模式
 
@@ -378,6 +379,19 @@ Top 10 常用表情及场景：
 6. 输出完成摘要
 
 `/deep` 不受 `/test` / `/train` 模式锁定，随时可用。可多次调用。
+
+### /wechat-export 模式
+
+当用户输入 `/wechat-export` 或询问如何导出微信聊天记录时，进入导出引导模式。
+
+1. 推荐 WeFlow（https://github.com/hicccc77/WeFlow）作为主力导出工具，附隐私说明和手动替代方案
+2. 用户需要安装时：检测平台 → 下载 → 询问是否授权自动安装 → 执行安装
+3. 逐步引导使用：打开 WeFlow → 获取密钥 → 导出 TXT
+4. 密钥获取失败时：推荐 WechatDump202601（https://github.com/Zst0NE/WechatDump202601）作为手动提取兜底
+5. 导出完成后询问是否直接载入蒸馏流程
+6. 密钥始终搞不定 → 不阻塞，建议手动复制粘贴或截图
+
+`/wechat-export` 不受 `/test` / `/train` 模式锁定，随时可用。
 
 ### /enrich 模式
 
@@ -1288,7 +1302,7 @@ description: Summons the {name} persona for conversation. Use when the user type
 
 ## 模式互斥
 
-`/{name}` 与 `/test`、`/train` 互斥。`/status`、`/enrich`、`/deep`、`/protect`、`/dev`、`/exit` 不受限制。
+`/{name}` 与 `/test`、`/train` 互斥。`/status`、`/enrich`、`/deep`、`/wechat-export`、`/protect`、`/dev`、`/exit` 不受限制。
 ```
 
 ### /bye Skill 模板
@@ -1469,4 +1483,96 @@ description: Deep re-reading of chat records for thorough personality distillati
 ## 模式互斥
 
 `/deep` 不受 `/test` / `/train` 模式锁定，随时可用。可多次调用。
+```
+
+### /wechat-export Skill 模板
+
+保存到 `.claude/skills/wechat-export/SKILL.md`：
+
+```
+---
+name: wechat-export
+description: Guides the user through exporting WeChat chat records for persona distillation. Use when the user types /wechat-export or asks how to export WeChat chat logs. Recommends WeFlow as the primary tool with WechatDump202601 as key-extraction fallback. Assists with download, installation, step-by-step usage, and seamless handoff to Phase 2 distillation.
+---
+
+# /wechat-export — 微信聊天记录导出引导
+
+引导用户导出微信聊天记录，用于人格蒸馏。推荐工具链（WeFlow 主力 + WechatDump202601 兜底），协助安装，逐步引导使用，导出后无缝衔接到蒸馏。
+
+## 进入流程
+
+### Step 0：判定工作目录
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
+### Step 1：推荐工具链
+
+首次使用时输出：
+
+```
+要导出微信聊天记录，推荐使用 WeFlow（https://github.com/hicccc77/WeFlow）——开源的微信聊天记录分析和导出工具，完全本地运行，支持导出为 TXT、HTML、JSON 等格式。
+
+WeFlow 是开源工具（GitHub 7k+ stars），完全本地运行，不会上传你的聊天记录。但如果你有顾虑，也可以手动复制粘贴——在微信中选中对话，复制后粘贴到 txt 文件里发给我。如果你使用的模型支持多模态，直接截图粘贴给我也行。
+
+需要我帮你下载安装吗？
+```
+
+### Step 2：安装引导
+
+#### 2.1 检测平台
+
+识别当前操作系统（Windows / macOS / Linux）。若非这三者，告知不支持自动安装，建议手动下载或复制粘贴。
+
+#### 2.2 下载
+
+从 GitHub Releases 下载最新版本到用户下载目录。下载前告知并等用户确认。
+
+#### 2.3 安装
+
+询问用户是否授权自动安装：
+- 授权 → 执行静默安装（Windows: .exe / macOS: .dmg / Linux: AppImage）
+- 不授权 → 告知文件位置，等用户手动安装后说"好了"
+- 安装失败 → 回退手动模式
+
+### Step 3：逐步使用引导
+
+每一步等用户确认后再进入下一步。
+
+#### 3.1 打开 WeFlow
+
+```
+打开 WeFlow，它会自动检测你电脑上的微信。确认微信已登录，然后告诉我"好了"。
+```
+
+未检测到微信 → 确认版本 ≥ 4.0 → 确认已登录 → 重试。
+
+#### 3.2 获取密钥
+
+- **成功** → 继续选择联系人/群聊
+- **失败** → 推荐 WechatDump202601（https://github.com/Zst0NE/WechatDump202601），该工具仅告知仓库地址，由用户自行决定。用户搞不定密钥 → 不阻塞，建议手动复制粘贴或截图
+
+#### 3.3 导出聊天记录
+
+推荐导出格式为 TXT。导出完成后获取文件路径。
+
+### Step 4：衔接到蒸馏流程
+
+询问用户是否直接载入蒸馏流程：
+- 同意 → 读取文件，进入 Phase 2 分析
+- 拒绝 → 告知文件路径，用户随时可发来
+
+## 边界处理
+
+| 场景 | 处理 |
+|---|---|
+| 不在 Windows/macOS/Linux | 告知不支持，建议手动 |
+| 下载/安装失败 | 回退到手动模式 |
+| 密钥获取失败 | 不阻塞，建议手动替代方案 |
+| 用户在 /test 或 /train 中 | 不受锁定，正常执行 |
+
+## 模式互斥
+
+`/wechat-export` 不受 `/test` / `/train` 模式锁定，随时可用。
 ```

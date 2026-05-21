@@ -140,6 +140,8 @@ K. 自定义：______
 可以是多个 txt 文件，也可以直接粘贴对话内容。越多越准，但一段有代表性的对话也可以开始。
 
 如果你还有其他能代表你说话风格或人格的文件（如社交媒体发帖、日记博客、工作邮件等），也可以一并发给我。上传后我会逐一询问你对每个文件的权重设定，然后按权重合并分析。如果你只想用聊天记录做标准蒸馏，跳过即可。
+
+不知道如何导出微信聊天记录？输入 /wechat-export 我帮你搞定。
 ```
 
 ### Step 2：分析聊天记录
@@ -594,6 +596,7 @@ dev/ 和 .claude/.mode_dev 已被 .gitignore 排除。
     ├── enrich/SKILL.md           # /enrich 加权丰富
     ├── protect/SKILL.md          # /protect 隐私保护
     ├── deep/SKILL.md             # /deep 深度阅读
+    ├── wechat-export/SKILL.md    # /wechat-export 导出引导
     ├── dev/SKILL.md              # /dev 开发者模式
     └── exit/SKILL.md             # /exit 退出开发模式
 ```
