@@ -249,6 +249,7 @@ Top 10 常用表情及场景：
 - `/test` : 进入测试模式，他人扮演者测试模型准确度
 - `/train` : 进入训练模式，你本人真实对话供模型学习
 - `/enrich` : 加权文件丰富模型，用额外文本源增强人格模型
+- `/deep` : 深度二次阅读，对聊天记录做多证据链的深入分析
 - `/protect` : 隐私保护向导，扫描敏感文件并生成 .gitignore
 - `/dev` : 进入开发者模式，创建隔离沙箱测试 Skill
 - `/exit` : 退出开发者模式
@@ -363,7 +364,20 @@ Top 10 常用表情及场景：
 
 `/next` 在 `/test` 中切换测试者，在 `/train` 中换身份训练。
 
-`/status`、`/enrich`、`/protect`、`/dev` 和 `/exit` 不受任何模式限制，随时可用。
+`/status`、`/enrich`、`/protect`、`/deep`、`/dev` 和 `/exit` 不受任何模式限制，随时可用。
+
+### /deep 模式
+
+当用户输入 `/deep` 时，进入深度二次阅读模式。
+
+1. 检查 `.claude/persona/model.md` 是否存在，不存在则提示先完成 Phase 2
+2. 询问用户指定范围 + 主动扫描薄弱点，供用户选择
+3. 对指定内容执行四层深度分析（语言指纹、行为模式、人物关系、底层价值观），每发现至少 3 条原文证据
+4. 按维度分组展示发现（原文证据 + 总结 + 与现有模型的差异），逐组确认
+5. 更新 model.md（版本号 +0.1），追加 linguistic-fingerprint.md，更新 person-profiles.md，追加 CHANGELOG
+6. 输出完成摘要
+
+`/deep` 不受 `/test` / `/train` 模式锁定，随时可用。可多次调用。
 
 ### /enrich 模式
 
@@ -1274,7 +1288,7 @@ description: Summons the {name} persona for conversation. Use when the user type
 
 ## 模式互斥
 
-`/{name}` 与 `/test`、`/train` 互斥。`/status`、`/enrich`、`/protect`、`/dev`、`/exit` 不受限制。
+`/{name}` 与 `/test`、`/train` 互斥。`/status`、`/enrich`、`/deep`、`/protect`、`/dev`、`/exit` 不受限制。
 ```
 
 ### /bye Skill 模板
@@ -1315,4 +1329,144 @@ description: Exits the /{name} persona conversation mode. Use when the user type
 ### Step 3：退出
 
 输出结束语后退出 `/{name}` 对话模式。
+```
+
+### /deep Skill 模板
+
+保存到 `.claude/skills/deep/SKILL.md`：
+
+```
+---
+name: deep
+description: Deep re-reading of chat records for thorough personality distillation. Use when the user types /deep to perform a second-pass deep analysis on chat logs — requiring multiple evidence chains per finding, discovering overlooked patterns, and interactively updating model.md, linguistic-fingerprint.md, and person-profiles.md under user guidance.
+---
+
+# /deep — 深度二次阅读
+
+对聊天记录进行深度二次阅读。Phase 2 蒸馏后，如果用户觉得某些记录的蒸馏不够彻底，通过 `/deep` 触发——每个发现必须有多个原文证据支撑，按维度分组展示，用户逐组确认后写入模型。
+
+## 进入流程
+
+### Step 0：判定工作目录
+
+检查 `.claude/.mode_dev` 文件是否存在：
+- 存在 → 基路径 = `dev/.claude/`
+- 不存在 → 基路径 = `.claude/`
+
+### Step 1：前置检查
+
+- `{base}.claude/persona/model.md` 存在 → 继续
+- 不存在 → 回复"还没有蒸馏模型，需要先完成 Phase 2。深度阅读是对已有蒸馏结果的二次分析。"
+
+### Step 2：确定深度阅读范围
+
+同时做两件事：
+
+**2.1 询问用户**
+
+```
+请指定要深度阅读的内容范围：
+- 指定文件路径（如 dev/mock/chat-sample.md）
+- 直接粘贴对话片段
+- 描述范围（如"重新分析我和 xd 的所有对话"、"深入看看情绪表达相关的记录"）
+
+也可以说"先帮我扫描"，让我先检查哪些维度可能蒸馏不充分。
+```
+
+**2.2 主动扫描薄弱点**
+
+如果用户说"先帮我扫描"或未指定范围，读取 `{base}.claude/persona/linguistic-fingerprint.md` 和 `{base}.claude/persona/model.md`，快速列出证据链偏弱的维度。扫描标准：
+
+- 某维度的原文示例少于 3 条
+- 人物档案中某人缺少关键记忆或互动风格描述只有一句话
+- 某情绪表达只有概括描述但缺乏原文引用
+- 深层行为结构缺乏具体对话场景支撑
+
+列出后供用户选择。
+
+### Step 3：深度分析
+
+对用户指定的聊天记录执行四层深度分析：
+
+**第一层：语言指纹** — 高频词、句式、Emoji、情绪表达的遗漏和细化
+**第二层：行为模式** — 对话角色、互动模式、深层结构的新线索
+**第三层：人物关系** — person-profiles 中人物细节、关键记忆的补充
+**第四层：底层价值观（新增）** — 隐含信念、一致性线索、未被言明的需求
+
+**证据标准**：每个发现至少 3 条原文证据。不足 3 条的备注为"待验证线索"。
+
+### Step 4：分组展示发现
+
+按维度分组展示。每个发现的格式：
+
+```
+### [维度名] 发现 N
+
+**原文证据**：
+> "原文引用 1" — 场景上下文
+> "原文引用 2" — 场景上下文
+> "原文引用 3" — 场景上下文
+
+**新发现**：<一句话总结>
+
+**与现有模型的差异**：
+- ✅ 已有覆盖：<现有模型中的相关描述>
+- 🆕 新增：<现有模型未覆盖的部分>
+- ⚠️ 冲突：<与现有模型矛盾的地方>
+```
+
+每组展示完后询问用户："这组发现里，哪些要写入模型？你可以说'全部采纳'、'第N条忽略'、或对某条提出修改。"
+
+### Step 5：用户确认后更新文件
+
+#### 5.1 更新 model.md
+
+增量更新，版本号 +0.1：
+- 数值维度：新证据纳入重新排序
+- 定性维度：新条目插入；冲突时新证据多的一方优先，另一方降级加注"备选表述"
+- 新增维度：追加 `## 底层价值观` 章节
+
+#### 5.2 追加 linguistic-fingerprint.md
+
+在文件底部追加，保留原始分析：
+
+```
+## 深度分析补充 V{new_version} ({date})
+```
+
+#### 5.3 更新 person-profiles.md
+
+新发现涉及特定人物 → 合并到对应条目；新人物 → 追加。
+
+#### 5.4 追加 CHANGELOG.md
+
+记录范围、采纳发现数、版本变更。
+
+### Step 6：输出完成信息
+
+```
+/deep 完成。
+
+本次深度阅读：
+- 分析范围：{范围描述}
+- 发现总数：N 条
+- 采纳：N 条
+
+模型已更新至 V{new_version}。
+```
+
+## 边界处理
+
+| 场景 | 处理 |
+|---|---|
+| 无模型可读 | 提示需先完成 Phase 2 |
+| 范围太模糊 | 追问具体范围，列出可用文件路径 |
+| 无新发现 | 诚实告知现有蒸馏已覆盖全面，不强行编造 |
+| 用户在 /test 或 /train 中 | 不受锁定，完成后提醒模式仍在进行中 |
+| 用户中断 | 保存已确认的发现，丢弃未确认部分 |
+| 原文量大 | 分批次分析，每批之间提示进度 |
+
+## 模式互斥
+
+`/deep` 不受 `/test` / `/train` 模式锁定，随时可用。可多次调用。
 ```
