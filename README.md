@@ -40,6 +40,7 @@
 | `/deep` | 深度二次阅读聊天记录，挖掘遗漏细节 |
 | `/wechat-export` | 微信聊天记录导出引导，推荐工具并协助安装 |
 | `/protect` | 隐私保护向导 |
+| `/doubao` | 导出豆包智能体 soul.md（2000字人格压缩） |
 
 ## 输出结构
 
@@ -54,7 +55,8 @@
 │   ├── rules.md                   # 调用规则（可跨对话唤醒）
 │   ├── CHANGELOG.md               # 版本更新日志
 │   ├── person-profiles.md         # 人物档案（可选）
-│   └── scenario-pool.md           # 场景池（可选）
+│   ├── scenario-pool.md           # 场景池（可选）
+│   └── soul.md                    # 豆包智能体灵魂文件（/doubao 生成）
 └── skills/
     ├── {name}/
     │   └── SKILL.md               # /{name} 人格对话
@@ -68,6 +70,7 @@
     ├── wechat-export/SKILL.md     # /wechat-export 导出引导
     ├── enrich/SKILL.md            # /enrich 加权丰富
     ├── protect/SKILL.md           # /protect 隐私保护
+    ├── doubao/SKILL.md            # /doubao 豆包智能体导出
     ├── dev/SKILL.md               # /dev 开发者模式
     ├── exit/SKILL.md              # /exit 退出开发模式
     └── status/SKILL.md

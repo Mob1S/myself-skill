@@ -418,6 +418,63 @@ K. 自定义：______
 
 ---
 
+## /doubao 指令：豆包智能体 soul.md 导出
+
+用户输入 `/doubao` 时触发。将蒸馏好的人格模型压缩为 2000 中文字以内的 `soul.md`，供豆包智能体使用。纯人格 + 人物档案，不含功能描述。
+
+### 前置条件
+
+- `.claude/persona/model.md` 必须存在（Phase 2 聊天蒸馏完成）
+- `.claude/persona/person-profiles.md` 可选（若不存在，从 model.md 自身的"人物档案"段提取）
+- `/doubao` 不受 `/test` / `/train` 模式锁定，随时可用
+
+### 执行规则
+
+1. 检查 `.claude/persona/model.md` 是否存在，不存在则提示先完成 Phase 2
+2. 询问用户身份段模式：
+   - **完整**：保留名字、年龄、职业、城市等
+   - **精简**：只保留名字，省下的字数分配给其他段落
+3. 收集外号映射：用户提供真名→外号的映射关系，未提供的自动去姓留名或首字母脱敏
+4. 读取 `model.md` 和 `person-profiles.md`，执行隐私过滤（真名脱敏、地点模糊化、转账删除、敏感事件抽象化、第三方脱敏）
+5. 按模板骨架生成 soul.md 草稿：
+
+```markdown
+# {name} 的灵魂
+
+## 我是谁
+{基础信息}
+
+## 我的性格
+{3-5 核心性格词 + 解释}
+
+## 我怎么说话
+{方言、标点、表情、高频词}
+
+## 我的情绪
+{最有辨识度的 3-4 种}
+
+## 我和谁说话
+{人物档案，按亲密度分圈}
+
+## 我的底线
+{边界与雷区 2-3 条}
+```
+
+6. 字数预算：身份 150 / 性格 300 / 说话方式 400 / 情绪 250 / 人物 700 / 底线 100 / 余量 100 = 2000
+7. 超长裁剪优先级：熟人圈（亲密度 4-6）整段删 → 好友圈（7-8）精简 → 说话风格压缩 → 核心圈/底线不动
+8. 输出草稿到对话中，附带字数统计（"当前 N/2000 字"），等用户确认
+9. 用户确认后写入 `.claude/persona/soul.md`
+
+### 字数统计规则
+
+只计可见中文字符（不含 markdown 标记 `#`、`|`、`-`、`*`，不含空格和换行）。英文单词按 1 个字计。
+
+### 可重复使用
+
+`/doubao` 可多次调用。每次重新读取最新模型文件生成 soul.md，覆盖旧文件。
+
+---
+
 ## Phase 3：测试模式（用户触发）
 
 当用户在任意对话中输入 `/test` 时触发。执行流程：
@@ -582,7 +639,8 @@ dev/ 和 .claude/.mode_dev 已被 .gitignore 排除。
 │   ├── rules.md                  # 所有指令规则（可跨对话唤醒）
 │   ├── CHANGELOG.md              # 版本更新日志
 │   ├── person-profiles.md        # （可选）人物档案
-│   └── scenario-pool.md          # （可选）场景池
+│   ├── scenario-pool.md          # （可选）场景池
+│   └── soul.md                   # 豆包智能体灵魂文件（/doubao 生成）
 └── skills/
     ├── {name}/
     │   └── SKILL.md              # /{name} 人格对话
@@ -597,6 +655,7 @@ dev/ 和 .claude/.mode_dev 已被 .gitignore 排除。
     ├── protect/SKILL.md          # /protect 隐私保护
     ├── deep/SKILL.md             # /deep 深度阅读
     ├── wechat-export/SKILL.md    # /wechat-export 导出引导
+    ├── doubao/SKILL.md           # /doubao 豆包智能体导出
     ├── dev/SKILL.md              # /dev 开发者模式
     └── exit/SKILL.md             # /exit 退出开发模式
 ```
