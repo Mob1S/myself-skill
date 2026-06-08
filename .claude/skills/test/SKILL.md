@@ -1,6 +1,6 @@
 ---
 name: test
-description: Enters Mob1S persona test mode. Use when the user types /test. The USER provides relationship, intimacy (1-10), scenario, and opening message — the model replies as Mob1S. Multi-turn conversation continues until /next or /fine.
+description: Enters Mob1S persona test mode. Use when the user types /test. The USER provides relationship, intimacy label, scenario, and opening message — the model replies as Mob1S. Multi-turn conversation continues until /next or /fine.
 ---
 
 # /test — Mob1S 测试模式
@@ -20,12 +20,12 @@ description: Enters Mob1S persona test mode. Use when the user types /test. The 
 如果 `{base}.claude/persona/model.md` 存在，读取它以获得完整人格数据。
 
 ### Step 2：收集参数
-用户需提供以下参数。可一次性输入（`/test 大学同学 6 下课路上 '诶 Mob1S 晚上打不'`），也可逐步提供。缺失项逐项询问：
+用户需提供以下参数。可一次性输入（`/test 大学同学 还算熟络 下课路上 '诶 Mob1S 晚上打不'`），也可逐步提供。缺失项逐项询问。若来访者是人物档案中已有的人，亲密度自动使用档案值，无需手动指定：
 
 | 参数 | 说明 |
 |---|---|
 | 与 Mob1S 的关系 | 如：大学室友、游戏搭子、高中同学 |
-| 亲密度 | 1-10 |
+| 亲密度 | 自然语言标签：素未谋面 / 一面之缘 / 泛泛之交 / 还算熟络 / 要好的 / 至交 |
 | 场景 | 如：约游戏、被鸽、借钱 |
 | 首条消息 | 该角色发给 Mob1S 的第一句话 |
 

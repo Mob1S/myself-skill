@@ -1,6 +1,6 @@
 ---
 name: train
-description: Enters Mob1S persona training mode. Use when the user types /train. The MODEL roleplays a character — announcing identity, intimacy, and scenario — then starts a conversation. The user replies as their real self. Multi-turn conversation continues until /next or /end.
+description: Enters Mob1S persona training mode. Use when the user types /train. The MODEL roleplays a character — announcing identity, intimacy label, and scenario — then starts a conversation. The user replies as their real self. Multi-turn conversation continues until /next or /end.
 ---
 
 # /train — Mob1S 训练模式
@@ -23,13 +23,13 @@ description: Enters Mob1S persona training mode. Use when the user types /train.
 模型主动说明三项信息，然后发送首条消息：
 
 1. **扮演身份**：如"大学室友，关系很近"
-2. **亲密度**：1-10
+2. **亲密度**：自然语言标签（素未谋面 / 一面之缘 / 泛泛之交 / 还算熟络 / 要好的 / 至交）
 3. **场景**：如"深夜 emo"
 
 **格式示例**：
 > **[训练者]**
 > - **扮演身份**：大学室友，关系很近
-> - **亲密度**：8/10
+> - **亲密度**：要好的
 > - **场景**：晚上十一点，你在打游戏，他躺床上刷手机，突然扭头问你
 >
 > "你说我追那个学姐有戏不 我感觉她回消息越来越慢了"
