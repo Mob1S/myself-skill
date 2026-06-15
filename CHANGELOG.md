@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [v1.9.0] - 2026-06-15
+- **改进** 参照 ex-breeze 结构，model.md 新增 Layer 0 硬规则（9 条不可违反的行为约束，优先级最高）
+- **改进** model.md 新增运行规则（7 条，Layer 0 → 深层行为 → 语言指纹三层判断顺序）
+- **改进** model.md 新增 Correction 记录区，支持 /test 和 /train 模式迭代修正
+- **新增** `meta.json` 结构化元数据模板（name、slug、version、profile、tags、memory_sources）
+- **更新** SKILL.md Phase 3.3：model.md 生成时必须包含 Layer 0 / 运行规则 / Correction
+- **更新** SKILL.md 新增 Phase 3.3.5：生成 meta.json
+- **更新** output-templates.md：model.md 模板加 Layer 0 + 运行规则 + Correction，新增 meta.json 模板
+- **更新** 隐私保护表新增 meta.json 条目（🟡 中敏感）
+
 ## [v1.8.0] - 2026-06-09
 - **改进** 亲密度从 1-10 数字改为 6 级自然语言标签：素未谋面 / 一面之缘 / 泛泛之交 / 还算熟络 / 要好的 / 至交
 - 人物档案中的访客自动使用档案亲密度，无需手动指定
