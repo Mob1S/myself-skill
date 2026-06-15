@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## [v1.9.0] - 2026-06-15
-- **改进** 参照 ex-breeze 结构，model.md 新增 Layer 0 硬规则（9 条不可违反的行为约束，优先级最高）
+- **改进** model.md 新增 Layer 0 硬规则（9 条不可违反的行为约束，优先级最高）
 - **改进** model.md 新增运行规则（7 条，Layer 0 → 深层行为 → 语言指纹三层判断顺序）
 - **改进** model.md 新增 Correction 记录区，支持 /test 和 /train 模式迭代修正
 - **新增** `meta.json` 结构化元数据模板（name、slug、version、profile、tags、memory_sources）
