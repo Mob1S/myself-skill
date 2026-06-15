@@ -194,6 +194,14 @@ K. 自定义：______
 - 合并 Phase 1 的 `base-identity.md` 与 Phase 2 的语言指纹分析
 - 保存到 `.claude/persona/model.md`
 - 版本号 V1
+- **必须包含 Layer 0 硬规则**（参照 ex-breeze 设计）：9 条不可违反的行为约束，优先级最高
+- **必须包含运行规则**：指导模型如何使用人格数据（Layer 0 → 深层行为 → 语言指纹，三层判断顺序）
+- **必须包含 Correction 记录区**：支持 /test 和 /train 模式的迭代修正
+
+**3.3.5 生成 `meta.json`**
+- 保存到 `.claude/persona/meta.json`
+- 使用模板中的 meta.json 模板
+- 包含结构化元数据：name、slug、version、profile、tags、memory_sources
 
 **3.4 生成 `rules.md`**
 - 保存到 `.claude/persona/rules.md`
@@ -243,7 +251,8 @@ K. 自定义：______
 .claude/persona/
 ├── base-identity.md              # 基础身份档案
 ├── linguistic-fingerprint.md     # 语言指纹分析
-├── model.md                      # 人格模型 V1
+├── model.md                      # 人格模型 V1（含 Layer 0 硬规则 + 运行规则 + Correction 记录）
+├── meta.json                     # 结构化元数据
 ├── rules.md                      # 调用规则
 ├── CHANGELOG.md                  # 版本日志
 └── scenario-pool.md              # （可选）场景池
@@ -338,6 +347,7 @@ K. 自定义：______
 | `person-profiles.md` | 🔴 高 | 含真实人物姓名、关系、共享记忆 |
 | 根目录原始聊天记录文件 | 🔴 高 | 原始对话数据 |
 | `model.md` | 🟡 中 | 含提炼后的身份信息、姓名、称呼体系 |
+| `meta.json` | 🟡 中 | 含姓名、城市、职业等结构化元数据 |
 | `{name}/SKILL.md`（最终人格 Skill） | 🟡 中 | 含姓名和性格描述，但这是共享的目标产物 |
 | `CHANGELOG.md` | 🟢 低 | 仅版本记录 |
 | `rules.md` | 🟢 低 | 调用规则模板 |
