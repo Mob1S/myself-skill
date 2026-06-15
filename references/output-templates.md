@@ -157,6 +157,7 @@ Top 10 常用表情及场景：
 | 职业/领域 | {occupation} |
 | 城市 | {city} |
 | 社交倾向 | {social_tendency} |
+| 锚点时段 | {anchor_period} |
 
 ## 性格核心
 
@@ -243,6 +244,20 @@ Top 10 常用表情及场景：
 ## 擅长情境
 
 {situational_strengths}
+
+---
+
+## 时间轴
+
+> 记录各时段的权重分配和锚点信息。跨度 < 3 个月时本节省略。
+
+| 时段 | 权重 | 说明 |
+|---|---|---|
+| {period_1} | {weight_1} | {note_1} |
+| {period_2} | {weight_2} | {note_2} |
+| ... | ... | ... |
+
+当前锚点：{anchor_period}
 
 ---
 
@@ -465,6 +480,7 @@ Top 10 常用表情及场景：
 - 当前版本号
 - 核心性格关键词
 - 最近一次更新时间
+- 锚点时段（如有时间轴数据）
 - 总测试/训练轮次
 
 ### /skill 模式
@@ -984,6 +1000,7 @@ Display the current model status.
    - Version number
    - Core personality keywords
    - Last update time
+   - Anchor period (if model has timeline data)
    - Total test/training rounds (if CHANGELOG available)
 ```
 
