@@ -9,6 +9,7 @@
 - **更新** SKILL.md 新增 Phase 3.3.5：生成 meta.json
 - **更新** output-templates.md：model.md 模板加 Layer 0 + 运行规则 + Correction，新增 meta.json 模板
 - **更新** 隐私保护表新增 meta.json 条目（🟡 中敏感）
+- 本次更新学习了ex-skill,再次致谢
 
 ## [v1.8.0] - 2026-06-09
 - **改进** 亲密度从 1-10 数字改为 6 级自然语言标签：素未谋面 / 一面之缘 / 泛泛之交 / 还算熟络 / 要好的 / 至交
