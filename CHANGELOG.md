@@ -1,7 +1,20 @@
 # CHANGELOG
 
+## [v2.0.0] - 2026-06-15
+- **新增** Phase 2 时间感知蒸馏：聊天记录自动按时间分段分析
+- **新增** Phase 2 Step 2 时间预处理：时间提取、跨度判定、合并兜底、断层检测
+- **新增** Phase 2 Step 4 变化轨迹展示：跨时段对比，用户确认后生成模型
+- **改进** Phase 2 Step 5 加权合并：默认锚定近期，衰减曲线自适应
+- **新增** model.md `anchor_period` 字段和 `## 时间轴` 段落
+- **更新** /deep 联动时段分析，深度发现按时段归类
+- **更新** /enrich 要求文件时间信息，纳入时段权重
+- **更新** /doubao 锚点感知，默认使用当前锚点时段导出
+- **更新** /status 展示锚点时段信息
+- **更新** output-templates.md：model.md 模板新增锚点时段和时间轴
+- **兼容** 跨度 < 3 个月时跳过时间预处理，走原始流程
+
 ## [v1.9.0] - 2026-06-15
-- **改进** 参照 ex-breeze 结构，model.md 新增 Layer 0 硬规则（9 条不可违反的行为约束，优先级最高）
+- **改进** model.md 新增 Layer 0 硬规则（9 条不可违反的行为约束，优先级最高）
 - **改进** model.md 新增运行规则（7 条，Layer 0 → 深层行为 → 语言指纹三层判断顺序）
 - **改进** model.md 新增 Correction 记录区，支持 /test 和 /train 模式迭代修正
 - **新增** `meta.json` 结构化元数据模板（name、slug、version、profile、tags、memory_sources）

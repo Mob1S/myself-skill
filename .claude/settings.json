@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"c:/ccproject/use-myeslf/.claude/persona/\")",
+      "Read(//c/ccproject/use-myeslf/.claude/persona/**)"
+    ]
+  }
+}
